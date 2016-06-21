@@ -1,0 +1,30 @@
+#!/usr/bin/groovy
+
+def k8s_token = '<unknown>'
+
+node ('master') {
+    k8s_token = readFile '/var/run/secrets/kubernetes.io/serviceaccount/token'
+}
+
+node('redhatdistortion-maven') {
+    def k8s_namespace = readFile '/var/run/secrets/kubernetes.io/serviceaccount/namespace'
+
+    stage 'Checkout'
+    checkout scm
+
+    stage 'Openshift login'
+    sh "oc login https://kubernetes.default/ --token=${k8s_token} --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    sh 'oc process -f .openshift-ci_cd/mongodb-deployment-template.yaml | oc apply -f -'
+//  Prepare the deployments so you can see pipeline in console overview when running for the first time
+    sh 'oc process -f .openshift-ci_cd/empty-deployment-template.yaml -v "APP_NAME=nodejs-ex-dev" | oc apply -f -'
+    stage 'Create Image'
+    sh 'oc delete bc nodejs-ex || true'  // Bugfix for https://github.com/openshift/origin/issues/9301
+    sh 'oc process -f https://github.com/tnozicka/openshift-templates/raw/master/binary-build-template.yaml \
+       -v "APP_NAME=nodejs-ex-dev,BUILDER_IMAGE=registry.access.redhat.com/openshift3/nodejs-010-rhel7,OUTPUT_IMAGESTREAM_TAG=nodejs-ex-dev:latest" | oc create -f -'
+    sh 'oc start-build nodejs-ex-dev --from-repo=. --follow'
+
+    stage 'Deploy to Dev'
+
+    sh 'oc process -f .openshift-ci_cd/deployment-template.yaml -v "APP_NAME=nodejs-ex-dev,IMAGE_STREAM_TAG=nodejs-ex-dev:latest" | oc apply -f -'
+
+}
