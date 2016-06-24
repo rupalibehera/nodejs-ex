@@ -14,8 +14,9 @@ node('redhatdistortion-maven') {
 
     stage 'Openshift login'
     sh "oc login https://kubernetes.default/ --token=${k8s_token} --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+    // deploy mongodb before deploying application
     sh 'oc process -f .openshift-ci_cd/mongodb-deployment-template.yaml | oc apply -f -'
-//  Prepare the deployments so you can see pipeline in console overview when running for the first time
+    // Prepare the deployments so you can see pipeline in console overview when running for the first time
     sh 'oc process -f .openshift-ci_cd/empty-deployment-template.yaml -v "APP_NAME=nodejs-ex-dev" | oc apply -f -'
     stage 'Create Image'
     sh 'oc delete bc nodejs-ex || true'  // Bugfix for https://github.com/openshift/origin/issues/9301
