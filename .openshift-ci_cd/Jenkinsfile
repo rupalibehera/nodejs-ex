@@ -6,7 +6,7 @@ node ('master') {
     k8s_token = readFile '/var/run/secrets/kubernetes.io/serviceaccount/token'
 }
 
-node('redhatdistortion-maven') {
+node('redhatdistortion-nodejs') {
     def k8s_namespace = readFile '/var/run/secrets/kubernetes.io/serviceaccount/namespace'
 
     stage 'Checkout'
@@ -25,7 +25,6 @@ node('redhatdistortion-maven') {
     sh 'oc start-build nodejs-ex-dev --from-repo=. --follow'
 
     stage 'Deploy to Dev'
-
     sh 'oc process -f .openshift-ci_cd/deployment-template.yaml -v "APP_NAME=nodejs-ex-dev,IMAGE_STREAM_TAG=nodejs-ex-dev:latest" | oc apply -f -'
 
 }
