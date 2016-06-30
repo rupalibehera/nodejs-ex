@@ -2,7 +2,7 @@
 def k8s_token = '<unknown>'
 
 node ('master') {
-    def k8s_token = readFile '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    k8s_token = readFile '/var/run/secrets/kubernetes.io/serviceaccount/token'
 }
 
 node ('redhatdistortion-nodejs') {
