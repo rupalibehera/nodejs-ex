@@ -6,6 +6,7 @@ node ('master') {
 }
 
 node('redhatdistortion-nodejs') {
+    k8s_token = readFile '/var/run/secrets/kubernetes.io/serviceaccount/token'
     def k8s_namespace = readFile '/var/run/secrets/kubernetes.io/serviceaccount/namespace'
 
     stage 'Checkout SCM'
