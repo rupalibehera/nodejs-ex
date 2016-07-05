@@ -30,4 +30,8 @@ node('redhatdistortion-nodejs') {
     sh 'oc delete route nodejs-ex-dev || true'  // Bugfix for https://github.com/openshift/origin/pull/9425 not getting into latest OpenShift release
     sh "oc process -f .openshift-ci_cd/deployment-template.yaml -v 'APP_NAME=nodejs-ex-dev,IMAGE_STREAM_NAMESPACE=${k8s_namespace},IMAGE_STREAM_TAG=nodejs-ex:latest' | oc apply -f -"
     sh 'oc annotate is nodejs-ex misc_$(date +%s)=foo || true'  // Hack for 0-2 minute pause caused by https://github.com/openshift/origin/issues/9018
+
+    stage 'Run Integration Tests'
+    sh 'IP=`oc get endpoints | grep nodejs-ex-dev | awk '{print $2}'| cut -d':' -f1`
+        && IP=$IP PORT=8080 mocha --timeout 5000 /home/vagrant/tests/app_test.js'
 }
