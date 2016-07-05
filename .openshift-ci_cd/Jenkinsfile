@@ -33,6 +33,5 @@ node('redhatdistortion-nodejs') {
 
     stage 'Run Integration Tests'
     sh 'sleep 90'
-    sh 'IP=`oc get endpoints | grep nodejs-ex-dev | awk '{print $2}'| cut -d':' -f1`
-        && IP=$IP PORT=8080 mocha --timeout 5000 /home/vagrant/tests/app_test.js'
+    sh 'IP=`oc get endpoints | grep nodejs-ex-dev | awk '{print $2}'| cut -d':' -f1` && IP=$IP PORT=8080 mocha --timeout 5000 /home/vagrant/tests/app_test.js'
 }
