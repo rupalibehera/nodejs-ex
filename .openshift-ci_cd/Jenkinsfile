@@ -11,7 +11,8 @@ node('redhatdistortion-nodejs') {
     stage 'Checkout SCM'
     checkout scm
 
-    sh 'oc login https://kubernetes.default/ --token=${k8s_token} --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+    //sh 'oc login https://kubernetes.default/ --token=${k8s_token} --certificate-authority=/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+    sh 'oc login https://kubernetes.default -u admin -p admin --insecure-skip-tls-verify=true'
 
     // Prepare the deployments so you can see pipeline in console overview when running for the first time
     // Deleting route first is a bugfix for https://github.com/openshift/origin/pull/9425 not getting into latest OpenShift release
